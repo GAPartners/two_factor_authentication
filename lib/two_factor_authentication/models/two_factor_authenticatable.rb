@@ -16,7 +16,8 @@ module Devise
         ::Devise::Models.config(
           self, :max_login_attempts, :allowed_otp_drift_seconds, :otp_length,
           :remember_otp_session_for_seconds, :otp_secret_encryption_key,
-          :direct_otp_length, :direct_otp_valid_for, :totp_timestamp, :delete_cookie_on_logout
+          :direct_otp_length, :direct_otp_valid_for, :totp_timestamp,
+          :delete_cookie_on_logout, :allow_multi_user_cookies
         )
       end
 
@@ -40,7 +41,7 @@ module Devise
           raise "authenticate_totp called with no otp_secret_key set" if totp_secret.nil?
           totp = ROTP::TOTP.new(totp_secret, digits: digits)
           new_timestamp = totp.verify(
-            without_spaces(code), 
+            without_spaces(code),
             drift_ahead: drift, drift_behind: drift, after: totp_timestamp
           )
           return false unless new_timestamp

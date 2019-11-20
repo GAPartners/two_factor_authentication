@@ -45,9 +45,10 @@ class Devise::TwoFactorAuthenticationController < DeviseController
     expires_seconds = resource.class.remember_otp_session_for_seconds
 
     if expires_seconds && expires_seconds > 0
-      cookies.signed[TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME] = {
-          value: "#{resource.class}-#{resource.public_send(Devise.second_factor_resource_id)}",
-          expires: expires_seconds.seconds.from_now
+      second_factor_resource_id = resource.public_send(Devise.second_factor_resource_id)
+      cookies.signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)] = {
+        value: "#{resource.class}-#{second_factor_resource_id}",
+        expires: expires_seconds.seconds.from_now
       }
     end
   end

@@ -32,11 +32,18 @@ module Devise
 
   mattr_accessor :delete_cookie_on_logout
   @@delete_cookie_on_logout = false
+
+  mattr_accessor :allow_multi_user_cookies
+  @@allow_multi_user_cookies = false
 end
 
 module TwoFactorAuthentication
   NEED_AUTHENTICATION = 'need_two_factor_authentication'
   REMEMBER_TFA_COOKIE_NAME = "remember_tfa"
+
+  def remember_tfa_cookie_name(id)
+    Devise.second_factor_resource_id ? "#{REMEMBER_TFA_COOKIE_NAME}_#{id}" : REMEMBER_TFA_COOKIE_NAME
+  end
 
   autoload :Schema, 'two_factor_authentication/schema'
   module Controllers
