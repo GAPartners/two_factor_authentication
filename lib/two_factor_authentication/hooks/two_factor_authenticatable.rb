@@ -15,6 +15,7 @@ end
 
 Warden::Manager.prepend_before_logout do |user, auth, _options|
   if Devise.delete_cookie_on_logout
-    auth.cookies.each { |key, _| auth.cookies.delete(key) if key.start_with?(TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME)}
+    auth.cookies.delete(TwoFactorAuthentication.remember_tfa_cookie_name(user&.public_send(Devise.second_factor_resource_id)))
+    auth.cookies.delete(TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME)
   end
 end

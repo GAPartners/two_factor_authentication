@@ -43,9 +43,9 @@ module TwoFactorAuthentication
 
   def self.remember_tfa_cookie_name(id)
     if Devise.allow_multi_user_cookies && id.present?
-      REMEMBER_TFA_COOKIE_NAME
-    else
       "#{REMEMBER_TFA_COOKIE_NAME}_#{Digest::SHA2.new(512).hexdigest(id.to_s)}"
+    else
+      REMEMBER_TFA_COOKIE_NAME
     end
   end
 
