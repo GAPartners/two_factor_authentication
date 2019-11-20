@@ -42,7 +42,7 @@ module TwoFactorAuthentication
   REMEMBER_TFA_COOKIE_NAME = "remember_tfa"
 
   def remember_tfa_cookie_name(id)
-    Devise.second_factor_resource_id ? "#{REMEMBER_TFA_COOKIE_NAME}_#{id}" : REMEMBER_TFA_COOKIE_NAME
+    Devise.allow_multi_user_cookies ? "#{REMEMBER_TFA_COOKIE_NAME}_#{id}" : REMEMBER_TFA_COOKIE_NAME
   end
 
   autoload :Schema, 'two_factor_authentication/schema'
