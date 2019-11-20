@@ -41,7 +41,7 @@ module TwoFactorAuthentication
   NEED_AUTHENTICATION = 'need_two_factor_authentication'
   REMEMBER_TFA_COOKIE_NAME = "remember_tfa"
 
-  def remember_tfa_cookie_name(id)
+  def self.remember_tfa_cookie_name(id)
     Devise.allow_multi_user_cookies ? "#{REMEMBER_TFA_COOKIE_NAME}_#{id}" : REMEMBER_TFA_COOKIE_NAME
   end
 
