@@ -13,10 +13,7 @@ Warden::Manager.after_authentication do |user, auth, options|
   end
 end
 
-Warden::Manager.before_logout do |user, auth, _options|
-  puts user
-  puts auth
-  puts _options
-  second_factor_resource_id = user.public_send(Devise.second_factor_resource_id)
+Warden::Manager.prepend_before_logout do |user, auth, _options|
+  second_factor_resource_id = user&.public_send(Devise.second_factor_resource_id)
   auth.cookies.delete(TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)) if Devise.delete_cookie_on_logout
 end
