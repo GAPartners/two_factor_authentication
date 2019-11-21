@@ -3,17 +3,17 @@ Warden::Manager.after_authentication do |user, auth, options|
     second_factor_resource_id = user.public_send(Devise.second_factor_resource_id)
     expected_cookie_value = "#{user.class}-#{second_factor_resource_id}"
 
-    if Devise.allow_multi_user_cookies && auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME].present?
-      actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME]
-      bypass_by_cookie = actual_cookie_value == expected_cookie_value
-    elsif !Devise.allow_multi_user_cookies && auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id, force: true)].present?
-      actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id, force: true)]
-      bypass_by_cookie = actual_cookie_value == expected_cookie_value
-    end
+    actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)]
+    bypass_by_cookie = actual_cookie_value == expected_cookie_value
 
     unless bypass_by_cookie
-      actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)]
-      bypass_by_cookie = actual_cookie_value == expected_cookie_value
+      if Devise.allow_multi_user_cookies && auth.env["action_dispatch.cookies"].key?(TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME)
+        actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME]
+        bypass_by_cookie = actual_cookie_value == expected_cookie_value
+      elsif !Devise.allow_multi_user_cookies && auth.env["action_dispatch.cookies"].key?(TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id, force: true))
+        actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id, force: true)]
+        bypass_by_cookie = actual_cookie_value == expected_cookie_value
+      end
     end
   end
 
