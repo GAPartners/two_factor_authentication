@@ -36,7 +36,7 @@ class Devise::TwoFactorAuthenticationController < DeviseController
       sign_in(resource_name, resource, bypass: true)
     end
     set_flash_message :notice, :success
-    resource.update_attribute(:second_factor_attempts_count, 0)
+    resource.update_columns(second_factor_attempts_count: 0)
 
     redirect_to after_two_factor_success_path_for(resource)
   end
