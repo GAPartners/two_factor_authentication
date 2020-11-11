@@ -46,10 +46,10 @@ class Devise::TwoFactorAuthenticationController < DeviseController
 
     if expires_seconds && expires_seconds > 0
       second_factor_resource_id = resource.public_send(Devise.second_factor_resource_id)
-      cookies.signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)] = {
-        value: "#{resource.class}-#{second_factor_resource_id}",
-        expires: expires_seconds.seconds.from_now
-      }
+        cookies.signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)] = {
+          value: "#{resource.class}-#{second_factor_resource_id}",
+          expires: expires_seconds.seconds.from_now
+        }
     end
   end
 

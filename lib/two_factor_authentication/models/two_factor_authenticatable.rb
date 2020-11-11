@@ -136,6 +136,14 @@ module Devise
           self.encrypted_otp_secret_key = otp_encrypt(value)
         end
 
+        def encrypt_api_token(value)
+          otp_encrypt(value)
+        end
+
+        def decrypt_api_token(value)
+          otp_decrypt(value)
+        end
+
         private
 
         def otp_decrypt(encrypted_value)
