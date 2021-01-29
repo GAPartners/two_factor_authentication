@@ -3,13 +3,14 @@ Warden::Manager.after_authentication do |user, auth, options|
     second_factor_resource_id = user.public_send(Devise.second_factor_resource_id)
     expected_cookie_value = "#{user.class}-#{second_factor_resource_id}"
 
+    puts "user.decrypt_api_token(auth.request.headers[\"X-2FA-ID\"]) => #{user.decrypt_api_token(auth.request.headers["X-2FA-ID"])}"
+
     actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)] ||
-                          user.decrypt_api_token(auth.request.get_header("X-2FA-ID"))&.split(':::')
-                          
+                          user.decrypt_api_token(auth.request.headers["X-2FA-ID"])&.split(':::')
     bypass_by_cookie = actual_cookie_value == expected_cookie_value ||
                         (actual_cookie_value.present? &&
                         actual_cookie_value.first == TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id) &&
-                        actual_cookie_value.last.to_datetime < Time.now.utc)
+                        actual_cookie_value.last.to_datetime > Time.now.utc)
 
     unless bypass_by_cookie
       if Devise.allow_multi_user_cookies && auth.env["action_dispatch.cookies"].key?(TwoFactorAuthentication::REMEMBER_TFA_COOKIE_NAME)
@@ -26,6 +27,8 @@ Warden::Manager.after_authentication do |user, auth, options|
     if auth.session(options[:scope])[TwoFactorAuthentication::NEED_AUTHENTICATION] = user.need_two_factor_authentication?(auth.request)
       user.send_new_otp if user.send_new_otp_after_login?
     end
+  else
+    auth.session(options[:scope])[TwoFactorAuthentication::NEED_AUTHENTICATION] = false
   end
 end
 
