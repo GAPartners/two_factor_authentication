@@ -149,16 +149,20 @@ module Devise
         def otp_decrypt(encrypted_value)
           return encrypted_value if encrypted_value.blank?
 
-          encrypted_value = encrypted_value.unpack('m').first
+          begin
+            encrypted_value = encrypted_value.unpack('m').first
 
-          value = ::Encryptor.decrypt(encryption_options_for(encrypted_value))
+            value = ::Encryptor.decrypt(encryption_options_for(encrypted_value))
 
-          if defined?(Encoding)
-            encoding = Encoding.default_internal || Encoding.default_external
-            value = value.force_encoding(encoding.name)
+            if defined?(Encoding)
+              encoding = Encoding.default_internal || Encoding.default_external
+              value = value.force_encoding(encoding.name)
+            end
+          rescue
+            encrypted_value
+          else
+            value
           end
-
-          value
         end
 
         def otp_encrypt(value)
