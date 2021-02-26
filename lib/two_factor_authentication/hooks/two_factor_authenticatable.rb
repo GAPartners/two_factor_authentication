@@ -3,8 +3,6 @@ Warden::Manager.after_authentication do |user, auth, options|
     second_factor_resource_id = user.public_send(Devise.second_factor_resource_id)
     expected_cookie_value = "#{user.class}-#{second_factor_resource_id}"
 
-    puts "user.decrypt_api_token(auth.request.headers[\"X-2FA-ID\"]) => #{user.decrypt_api_token(auth.request.headers["X-2FA-ID"])}"
-
     actual_cookie_value = auth.env["action_dispatch.cookies"].signed[TwoFactorAuthentication.remember_tfa_cookie_name(second_factor_resource_id)] ||
                           user.decrypt_api_token(auth.request.headers["X-2FA-ID"])&.split(':::')
     bypass_by_cookie = actual_cookie_value == expected_cookie_value ||
