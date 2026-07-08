@@ -323,4 +323,35 @@ describe Devise::Models::TwoFactorAuthenticatable do
       end
     end
   end
+
+  describe '#decrypt_api_token' do
+    let(:instance) { build_guest_user }
+
+    it 'returns a valid decrypted value unchanged' do
+      allow(instance).to receive(:otp_decrypt).with('token').and_return('User-1:::2099-01-01')
+
+      expect(instance.decrypt_api_token('token')).to eq('User-1:::2099-01-01')
+    end
+
+    it 'passes blank values through' do
+      allow(instance).to receive(:otp_decrypt).with(nil).and_return(nil)
+
+      expect(instance.decrypt_api_token(nil)).to be_nil
+    end
+
+    # decrypt_api_token receives the untrusted X-2FA-ID request header. A malformed value can
+    # decrypt to invalid UTF-8 bytes, and the warden after_authentication hook then calls
+    # String#split on the result -> ArgumentError: invalid byte sequence in UTF-8. It must fail
+    # closed (nil) rather than return crash-inducing bytes.
+    it 'returns nil for invalid-encoding bytes instead of crashing String#split callers' do
+      invalid = "\xC3\x28garbage".dup.force_encoding('UTF-8')
+      expect(invalid.valid_encoding?).to be(false) # sanity: this is the shape that crashes .split
+      allow(instance).to receive(:otp_decrypt).with('bad-header').and_return(invalid)
+
+      result = instance.decrypt_api_token('bad-header')
+
+      expect(result).to be_nil
+      expect { result&.split(':::') }.not_to raise_error
+    end
+  end
 end
