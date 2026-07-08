@@ -141,7 +141,16 @@ module Devise
         end
 
         def decrypt_api_token(value)
-          otp_decrypt(value)
+          decrypted = otp_decrypt(value)
+          return decrypted if decrypted.blank?
+
+          # decrypt_api_token is fed the X-2FA-ID request header, i.e. untrusted client input. A
+          # malformed value can decrypt to bytes that are not valid UTF-8 (or otp_decrypt's rescue
+          # returns the raw ciphertext), and callers String#split the result — which raises
+          # ArgumentError: invalid byte sequence in UTF-8. Fail closed: return nil so authentication
+          # still requires 2FA instead of crashing the request.
+          decrypted = decrypted.to_s
+          decrypted.valid_encoding? ? decrypted : nil
         end
 
         private
