@@ -101,6 +101,11 @@ describe Devise::Models::TwoFactorAuthenticatable do
         expect(do_invoke(code, instance)).to eq(true)
         expect(do_invoke(code, instance)).to eq(false)
       end
+
+      it 'records the timestamp as a Time, not the raw epoch Integer' do
+        do_invoke(@totp_helper.totp_code, instance)
+        expect(instance.totp_timestamp).to be_a(Time)
+      end
     end
 
     it_behaves_like 'authenticate_totp', GuestUser.new
