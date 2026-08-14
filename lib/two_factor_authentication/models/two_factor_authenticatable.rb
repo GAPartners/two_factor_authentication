@@ -45,9 +45,6 @@ module Devise
             drift_ahead: drift, drift_behind: drift, after: totp_timestamp
           )
           return false unless new_timestamp
-          # ROTP returns a Unix epoch Integer, but totp_timestamp is a :timestamp column (see the
-          # generated migration). Rails < 8 cast the Integer away to nil; Rails 8 passes it to the
-          # adapter, which the database then rejects.
           self.totp_timestamp = Time.at(new_timestamp).utc
           true
         end

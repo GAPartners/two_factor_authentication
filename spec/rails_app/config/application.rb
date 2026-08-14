@@ -3,7 +3,10 @@ require File.expand_path('../boot', __FILE__)
 require "active_record/railtie"
 require "action_controller/railtie"
 require "action_mailer/railtie"
-require "sprockets/railtie"
+begin
+  require "sprockets/railtie"
+rescue LoadError
+end
 
 Bundler.require(*Rails.groups)
 require "two_factor_authentication"
@@ -17,6 +20,10 @@ module Dummy
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
     config.autoload_paths += %W(#{config.root}/lib)
+
+    if defined?(Rails.autoloaders) && Rails.autoloaders.respond_to?(:each)
+      Rails.autoloaders.each { |loader| loader.inflector.inflect('sms_provider' => 'SMSProvider') }
+    end
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -47,11 +54,10 @@ module Dummy
     # like if you have constraints or database-specific column types
     # config.active_record.schema_format = :sql
 
-    # Enable the asset pipeline
-    config.assets.enabled = true
-
-    # Version of your assets, change this if you want to expire all your assets
-    config.assets.version = '1.0'
+    if config.respond_to?(:assets)
+      config.assets.enabled = true
+      config.assets.version = '1.0'
+    end
 
     config.action_mailer.default_url_options = { host: 'localhost:3000' }
 
